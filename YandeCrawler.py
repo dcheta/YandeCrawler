@@ -1,4 +1,6 @@
 import requests
+import os
+from concurrent import futures
 
 def get_url(main_url):
     url_ls = []
@@ -9,8 +11,6 @@ def get_url(main_url):
         begin = result.find('\"id\"', begin)
         url_ls.append('https://yande.re/post/show/'+result[begin + 5:result.find(',', begin)])
         begin = result.find('Post.register', begin)
-    print(url_ls)
-    print(len(url_ls))
     return(url_ls)
 
 def download(url,file_name):
@@ -30,6 +30,7 @@ if __name__ == '__main__':
     start_page=1
     end_page=1
     tags='sakimichan'
+    num_thread=5
     url_ls=[]
     for i in range(end_page-start_page+1):
         main_url='https://yande.re/post?page='+str(i+start_page)+'&tags='+tags
@@ -37,9 +38,13 @@ if __name__ == '__main__':
         print('第%d页的图片链接已提取' %(i+start_page))
     print(url_ls)
     print(len(url_ls))
-    i=1
+    if not os.path.exists(tags):
+        os.mkdir(tags)
+    p = futures.ThreadPoolExecutor(max_workers=num_thread)
     for url in url_ls:
-        file_name=str(i)+'.jpg'
-        download(url, file_name)
-        i=i+1
+        file_name=tags+'/'+str(url_ls.index(url))+'.jpg'
+        #download(url, file_name)
+        future=p.submit(download, url, tags+'/'+str(url_ls.index(url)+1)+'.jpg')
+    p.shutdown()
+
 
