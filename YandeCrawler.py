@@ -14,13 +14,12 @@ def get_url(main_url):
     return(url_ls)
 
 def download(url,file_name,i):
-    #url = 'https://yande.re/post/show/561898'
+    print('第%d张图片正在下载' %(i))
     response = requests.get(url)
     result = response.text
     start=result.find('https://files.yande.re/image')
     end=result.find('jpg',start)+3
     large_url=result[start:end]
-    print('第%d张图片正在下载' %(i))
     response = requests.get(large_url)
     img = response.content
     with open(file_name, 'wb') as f:
