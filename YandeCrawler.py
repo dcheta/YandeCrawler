@@ -13,18 +13,19 @@ def get_url(main_url):
         begin = result.find('Post.register', begin)
     return(url_ls)
 
-def download(url,file_name):
+def download(url,file_name,i):
     #url = 'https://yande.re/post/show/561898'
     response = requests.get(url)
     result = response.text
     start=result.find('https://files.yande.re/image')
     end=result.find('jpg',start)+3
     large_url=result[start:end]
-    print(large_url)
+    print('第%d张图片正在下载' %(i))
     response = requests.get(large_url)
     img = response.content
     with open(file_name, 'wb') as f:
         f.write(img)
+    print('第%d张图片已完成下载' %(i))
 
 if __name__ == '__main__':
     start_page=1
@@ -44,7 +45,8 @@ if __name__ == '__main__':
     for url in url_ls:
         file_name=tags+'/'+str(url_ls.index(url))+'.jpg'
         #download(url, file_name)
-        future=p.submit(download, url, tags+'/'+str(url_ls.index(url)+1)+'.jpg')
+        future=p.submit(download, url, tags+'/'+str(url_ls.index(url)+1)+'.jpg', url_ls.index(url)+1)
     p.shutdown()
+    print("下载完成")
 
 
