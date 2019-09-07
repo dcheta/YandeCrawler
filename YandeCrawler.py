@@ -18,33 +18,31 @@ def download(url,file_name,i):
     response = requests.get(url)
     result = response.text
     start=result.find('https://files.yande.re/image')
-    end=result.find('jpg',start)+3
+    end=result.find('\"',start)
     large_url=result[start:end]
     response = requests.get(large_url)
     img = response.content
-    with open(file_name, 'wb') as f:
+    with open(file_name+'.'+large_url.split('.')[-1], 'wb') as f:
         f.write(img)
     print('第%d张图片已完成下载' %(i))
 
 if __name__ == '__main__':
     start_page=1
-    end_page=1
+    end_page=13
     tags='sakimichan'
-    num_thread=5
+    num_thread=10
     url_ls=[]
     for i in range(end_page-start_page+1):
         main_url='https://yande.re/post?page='+str(i+start_page)+'&tags='+tags
         url_ls.extend(get_url(main_url))
         print('第%d页的图片链接已提取' %(i+start_page))
-    print(url_ls)
-    print(len(url_ls))
+    print('一共%d张图片' %(len(url_ls)))
     if not os.path.exists(tags):
         os.mkdir(tags)
     p = futures.ThreadPoolExecutor(max_workers=num_thread)
     for url in url_ls:
-        file_name=tags+'/'+str(url_ls.index(url))+'.jpg'
-        #download(url, file_name)
-        future=p.submit(download, url, tags+'/'+str(url_ls.index(url)+1)+'.jpg', url_ls.index(url)+1)
+        file_name=tags+'/'+str(url_ls.index(url)+1)
+        future=p.submit(download, url, file_name, url_ls.index(url)+1)
     p.shutdown()
     print("下载完成")
 
