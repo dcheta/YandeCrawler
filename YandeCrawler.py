@@ -1,16 +1,15 @@
 import requests
 import os
+import re
 from concurrent import futures
 
 def get_url(main_url):
     url_ls = []
     response = requests.get(main_url)
     result = response.text
-    begin = result.find('Post.register')
-    while (result.find('\"id\"', begin) != -1):
-        begin = result.find('\"id\"', begin)
-        url_ls.append('https://yande.re/post/show/'+result[begin + 5:result.find(',', begin)])
-        begin = result.find('Post.register', begin)
+    id_list=re.findall(r'Post.register\(\{\"id\":([0-9]+)',result,re.M)
+    for id in id_list:
+        url_ls.append('https://yande.re/post/show/' + id)
     return(url_ls)
 
 def download(url,file_name,i):
@@ -28,7 +27,7 @@ def download(url,file_name,i):
 
 if __name__ == '__main__':
     start_page=1
-    end_page=13
+    end_page=1
     tags='sakimichan'
     num_thread=10
     url_ls=[]
@@ -45,5 +44,3 @@ if __name__ == '__main__':
         future=p.submit(download, url, file_name, url_ls.index(url)+1)
     p.shutdown()
     print("下载完成")
-
-
